@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload and Download</title>
+</head>
+<body>
+    <h1>File Upload</h1>
+    <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+        <input type="file" name="file">
+        <button type="submit">Upload File</button>
+    </form>
+
+    <h1>File Download</h1>
+
+    <select id="downloadFiles">
+
+    </select>
+
+        <button id="downloadButton">Download File</button>
+
+    <script>
+    fetch('/files')
+      .then(response => response.json())
+      .then(files => {
+        const selectElement = document.getElementById('downloadFiles');
+        files.forEach(file => {
+          const option = document.createElement('option');
+          option.text = file;
+          option.value = file;
+          selectElement.appendChild(option);
+        });
+      })
+      .catch(error => console.error('Error:', error));
+
+      const selectElement = document.getElementById("downloadFiles");
+
+      const downloadButton = document.getElementById("downloadButton");
+
+downloadButton.addEventListener("click", function() {
+  const selectedFileName = selectElement.value;
+  if (selectedFileName) {
+    // Construct the download URL
+    var downloadUrl = `/download/${selectedFileName}`;
+
+    // Trigger the download by creating a hidden link and simulating a click
+    var hiddenLink = document.createElement("a");
+    hiddenLink.href = downloadUrl;
+    hiddenLink.download = selectedFileName;
+    hiddenLink.style.display = "none";
+    document.body.appendChild(hiddenLink);
+    hiddenLink.click();
+    document.body.removeChild(hiddenLink);
+  } else {
+    alert("Please select a file to download.");
+  }
+});
+
+document.getElementById("uploadForm").addEventListener("submit", function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    // Create a FormData object from the form
+    var formData = new FormData(this);
+
+    // Simulate the file upload using fetch (replace this with your actual upload endpoint)
+    fetch("/upload", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Handle the response from the server (assuming the server responds with JSON indicating success)
+        if (data.success) {
+            // Reload the page after successful upload
+            location.reload();
+        } else {
+            // Handle errors or display messages as needed
+            console.error("Upload failed:", data.error);
+        }
+    })
+    .catch(error => {
+        // Handle fetch errors or network issues
+        console.error("Fetch error:", error);
+    });
+});
+
+
+    </script>
+</body>
+
+</html>
